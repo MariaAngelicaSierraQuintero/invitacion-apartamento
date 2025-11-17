@@ -87,7 +87,7 @@ export default function AmigasPage() {
             href="https://maps.app.goo.gl/L96kErubJ4JBC2h78"
             target="_blank"
             className="
-              absolute left-[12%] right-[12%] top-[69%] h-[56px]
+              absolute left-[12%] right-[12%] top-[69%] h-14
               flex items-center justify-center
               text-black text-lg font-semibold
             "
@@ -131,7 +131,7 @@ export default function AmigasPage() {
                     }}
                   >
                     {/* Imagen grande */}
-                    <div className="w-40 h-40 rounded-xl overflow-hidden flex-shrink-0 bg-black/50">
+                    <div className="w-40 h-40 rounded-xl overflow-hidden shrink-0 bg-black/50">
                       {item.image_url && (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
