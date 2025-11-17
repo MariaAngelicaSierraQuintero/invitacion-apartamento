@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../../lib/supabaseClient'
 
+const DORADO = '#d4b761'
+
 type ItemRow = {
   item_id: string
   name: string
@@ -13,52 +15,24 @@ type ItemRow = {
   selected_at: string | null
 }
 
-type GroupRow = {
-  id: string
-  slug: string
-  title: string
-  address: string
-  map_url: string | null
-  date: string    // 'YYYY-MM-DD'
-  time: string    // 'HH:MM:SS'
-}
-
 export default function AmigasPage() {
-  const [group, setGroup] = useState<GroupRow | null>(null)
   const [items, setItems] = useState<ItemRow[]>([])
   const [loading, setLoading] = useState(true)
 
   const load = async () => {
     setLoading(true)
-
-    // 1) Traer datos del grupo "amigas"
-    const { data: groupData, error: groupError } = await supabase
-      .from('groups')
-      .select('*')
-      .eq('slug', 'amigas')
-      .maybeSingle()
-
-    if (groupError || !groupData) {
-      console.error('Error cargando grupo', groupError)
-      setLoading(false)
-      return
-    }
-
-    setGroup(groupData as GroupRow)
-
-    // 2) Traer lista de regalos (global)
-    const { data: itemsData, error: itemsError } = await supabase
+    const { data, error } = await supabase
       .from('v_items_with_status')
       .select('*')
       .order('name', { ascending: true })
 
-    if (itemsError) {
-      console.error('Error cargando items', itemsError)
+    if (error) {
+      console.error(error)
       setLoading(false)
       return
     }
 
-    setItems((itemsData || []) as ItemRow[])
+    setItems((data || []) as ItemRow[])
     setLoading(false)
   }
 
@@ -69,167 +43,142 @@ export default function AmigasPage() {
   const seleccionar = async (item: ItemRow) => {
     if (item.selection_id) return
 
-    const seguro = confirm(
-      '¿Seguro que quieres seleccionar este regalo? No podrás cambiarlo.'
-    )
-    if (!seguro) return
+    const ok = confirm('¿Quieres seleccionar este regalo?')
+    if (!ok) return
 
-    const nombre =
-      (prompt('Tu nombre o familia (opcional)') || 'Invitado').trim()
+    const nombre = (prompt('Tu nombre o familia (opcional)') || 'Invitado').trim()
 
     const { error } = await supabase
       .from('selections')
       .insert({ item_id: item.item_id, selected_by: nombre })
 
     if (error) {
-      // 23505 = alguien lo seleccionó justo antes (unique constraint)
-      if ((error as any).code === '23505') {
-        alert('¡Ups! Alguien lo seleccionó un segundo antes. Elige otro 🙂')
-      } else {
-        console.error('Error al seleccionar', error)
-        alert('No se pudo seleccionar. Intenta de nuevo.')
-      }
+      alert('Este regalo ya fue seleccionado por otra persona.')
       return
     }
 
-    await load()
+    load()
   }
 
-  const formatDateTime = () => {
-    if (!group) return ''
-    const d = new Date(`${group.date}T${group.time}`)
-    const fecha = d.toLocaleDateString('es-CO', {
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric',
-    })
-    const hora = d.toLocaleTimeString('es-CO', {
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-    return `${fecha} · ${hora}`
-  }
+  return (
+    <main className="relative min-h-screen w-full flex justify-center px-4 py-6">
+      {/* Fondo fijo igual al de la home */}
+      <div
+        className="fixed inset-0 -z-10"
+        style={{
+          backgroundImage: "url('/home-bg.png')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      />
 
-  if (loading && !group) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-yellow-50">
-        <p>Cargando grupo...</p>
-      </div>
-    )
-  }
+      {/* Contenido centrado (tarjeta + lista) */}
+      <div className="w-full max-w-[480px] flex flex-col items-stretch gap-8 pb-10">
+        {/* Tarjeta principal (como la tenías) */}
+        <div className="relative w-full">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/tarjeta-amigas.png"
+            alt="Invitación amigas"
+            className="w-full h-auto block"
+          />
 
-  if (!group) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-yellow-50">
-        <p>No se encontró el grupo de amigas.</p>
-      </div>
-    )
-  }
+          <a
+            href="https://maps.app.goo.gl/L96kErubJ4JBC2h78"
+            target="_blank"
+            className="
+              absolute left-[12%] right-[12%] top-[69%] h-[56px]
+              flex items-center justify-center
+              text-black text-lg font-semibold
+            "
+          >
+            Ver en el mapa
+          </a>
+        </div>
 
-   return (
-    <div className="min-h-screen bg-[#f7f1e8] text-slate-900 px-4 py-6 flex justify-center">
-      <div className="w-full max-w-md">
-        <header className="mb-5">
-          <p className="text-xs uppercase tracking-[0.15em] text-[#b08950]">
-            Inauguración de apartamento
-          </p>
-          <h1 className="text-2xl font-semibold text-[#1e3a8a]">
-            {group.title}
-          </h1>
-          <p className="text-sm text-slate-700 mt-1">
-            {formatDateTime()}
-          </p>
-          <p className="text-sm text-slate-700 flex flex-col mt-1">
-            <span>{group.address}</span>
-            {group.map_url && (
-              <a
-                href={group.map_url}
-                target="_blank"
-                rel="noreferrer"
-                className="text-xs text-[#1e3a8a] underline mt-1 w-fit"
-              >
-                Ver ubicación en Google Maps
-              </a>
-            )}
-          </p>
+        {/* Lista de regalos en un panel, sin tocar el fondo */}
+        <section
+          className="rounded-2xl p-5 mb-4"
+          style={{ backgroundColor: 'rgba(0,0,0,0.75)' }}
+        >
+          <h2
+            className="text-center text-2xl font-bold mb-4"
+            style={{ color: DORADO }}
+          >
+            Lista de regalos
+          </h2>
 
-          <p className="text-sm text-slate-700 mt-4">
-            Empiezo una nueva etapa de vida y me hace mucha ilusión que me
-            acompañes. 💛
-          </p>
-          <p className="text-xs text-slate-600 mt-1">
-            La lista es solo para <b>evitar regalos repetidos</b>. 
-            Cada quien puede elegir <b>dónde comprarlo</b>.
-          </p>
-        </header>
+          <p className="text-base text-slate-100 text-center mb-5 leading-relaxed font-medium">
+  La lista es solo para evitar regalos repetidos. <br />
+  Cada quien puede comprar donde prefiera.
+</p>
 
-        {loading ? (
-          <p className="text-sm text-slate-700">Cargando regalos...</p>
-        ) : (
-          <ul className="space-y-3">
-            {items.map((it) => {
-              const selected = !!it.selection_id
 
-              return (
-                <li
-                  key={it.item_id}
-                  className={`rounded-2xl border p-3 bg-white shadow-sm flex gap-3 ${
-                    selected ? 'opacity-60 border-[#e4d3b7]' : 'border-[#d8b97a]'
-                  }`}
-                >
-                  <div className="w-24 h-24 rounded-xl overflow-hidden bg-[#f1e5d4] flex-shrink-0">
-                    {it.image_url && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={it.image_url}
-                        alt={it.name}
-                        className="w-full h-full object-cover"
-                      />
-                    )}
-                  </div>
+          {loading ? (
+            <p className="text-white text-center">Cargando...</p>
+          ) : (
+            <ul className="space-y-4">
+              {items.map((item) => {
+                const seleccionado = !!item.selection_id
 
-                  <div className="flex-1 flex flex-col justify-between">
-                    <div>
-                      <p className="font-medium text-[#1e3a8a]">
-                        {it.name}
-                      </p>
-                      {it.description && (
-                        <p className="text-sm text-slate-700">
-                          {it.description}
-                        </p>
-                      )}
-                      {selected && (
-                        <p className="mt-1 text-xs text-slate-600">
-                          Seleccionado
-                          {it.selected_by ? ` por ${it.selected_by}` : ''}.
-                        </p>
+                return (
+                  <li
+                    key={item.item_id}
+                    className="flex gap-4 p-4 rounded-xl"
+                    style={{
+                      backgroundColor: 'rgba(255,255,255,0.06)',
+                      border: `1px solid ${DORADO}`,
+                    }}
+                  >
+                    {/* Imagen grande */}
+                    <div className="w-40 h-40 rounded-xl overflow-hidden flex-shrink-0 bg-black/50">
+                      {item.image_url && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={item.image_url}
+                          alt={item.name}
+                          className="w-full h-full object-cover"
+                        />
                       )}
                     </div>
 
-                    <div className="mt-2">
-                      <button
-                        onClick={() => seleccionar(it)}
-                        disabled={selected}
-                        className={`text-sm px-3 py-2 rounded-full border transition w-full ${
-                          selected
-                            ? 'cursor-not-allowed border-[#e4d3b7] bg-[#f5eee3] text-slate-500'
-                            : 'border-[#d4af37] bg-white text-[#1e3a8a] active:scale-[0.97]'
-                        }`}
+                    {/* Info del regalo */}
+                    <div className="flex-1 text-white">
+                      <p
+                        className="text-lg font-semibold"
+                        style={{ color: DORADO }}
                       >
-                        {selected ? 'Ya seleccionado' : 'Seleccionar'}
-                      </button>
-                    </div>
-                  </div>
-                </li>
-              )
-            })}
-          </ul>
-        )}
+                        {item.name}
+                      </p>
 
-        <footer className="mt-6 text-[11px] text-slate-600 text-center">
-          Si te equivocas al elegir algo, me puedes escribir y lo actualizamos 🤍
-        </footer>
+                      {item.description && (
+                        <p className="text-sm text-white/80">
+                          {item.description}
+                        </p>
+                      )}
+
+                      {!seleccionado ? (
+                        <button
+                          onClick={() => seleccionar(item)}
+                          className="w-full mt-2 py-2 rounded-full text-black font-bold text-xs"
+                          style={{ backgroundColor: DORADO }}
+                        >
+                          Seleccionar
+                        </button>
+                      ) : (
+                        <p className="mt-2 text-xs text-slate-300">
+                          Ya seleccionado
+                          {item.selected_by ? ` por ${item.selected_by}` : ''}.
+                        </p>
+                      )}
+                    </div>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+        </section>
       </div>
-    </div>
+    </main>
   )
 }

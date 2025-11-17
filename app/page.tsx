@@ -3,85 +3,77 @@
 import Link from 'next/link'
 
 export default function Home() {
-  const azul = '#001b3d'
-  const dorado = '#F7DA82'
-
   return (
     <main
-      className="min-h-screen flex justify-center items-stretch"
-      style={{ backgroundColor: azul }}
+      className="min-h-screen w-full flex justify-center items-center px-4"
+      style={{
+        backgroundImage: "url('/home-bg.png')",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
     >
-      <div
-        className="w-full max-w-md flex flex-col justify-between px-6 pb-8 pt-10"
-        style={{
-          backgroundImage: "url('/grand-opening.png')",
-          backgroundSize: 'cover',
-          backgroundPosition: 'top center',
-        }}
-      >
-        {/* Capa para que el texto de abajo se lea mejor */}
-        <div className="flex-1 flex flex-col justify-end bg-gradient-to-b from-transparent via-[#001b3d88] to-[#001b3d] -mx-6 -mb-8 px-6 pb-8 pt-24">
-          <section className="space-y-3">
-            <h1
-              className="text-2xl font-semibold"
-              style={{ color: dorado }}
-            >
-              Nuevo hogar, nuevas historias 🏡
-            </h1>
+      {/* Ajusta aquí el tamaño máximo de tu tarjeta */}
+      <div className="relative w-full max-w-[480px]">
 
-            <p className="text-sm text-slate-100">
-              Empiezo una nueva etapa de vida y quiero compartirla contigo.
-              Elige el grupo que te corresponde para ver la fecha, la
-              dirección y la lista de regalos.
-            </p>
+        {/* Tarjeta principal */}
+        <img
+          src="/home-card.png"
+          alt="Invitación inauguración"
+          className="w-full h-auto block"
+        />
 
-            <div className="mt-5 flex flex-col gap-3">
-              <Link
-                href="/grupo/amigas"
-                className="w-full text-center text-sm font-semibold py-2 rounded-full border transition active:scale-[0.97]"
-                style={{
-                  borderColor: dorado,
-                  color: dorado,
-                }}
-              >
-                Amigas
-              </Link>
+        {/* BOTONES (ajustados) */}
+        {/* Botón 1 */}
+        <Link
+          href="/grupo/amigas"
+          className="
+            absolute 
+            left-[12%] 
+            right-[12%] 
+            top-[45%]        /* Ajustar si lo quieres más arriba/abajo */
+            h-[60px] 
+            flex items-center justify-center
+           text-black text-2xl font-semibold tracking-wide
 
-              <Link
-                href="/grupo/familia"
-                className="w-full text-center text-sm font-semibold py-2 rounded-full border transition active:scale-[0.97]"
-                style={{
-                  borderColor: dorado,
-                  color: dorado,
-                }}
-              >
-                Familia
-              </Link>
+          "
+        >
+          Amigas
+        </Link>
 
-              <Link
-                href="/grupo/colegas"
-                className="w-full text-center text-sm font-semibold py-2 rounded-full border transition active:scale-[0.97]"
-                style={{
-                  borderColor: dorado,
-                  color: dorado,
-                }}
-              >
-                Colegas
-              </Link>
-            </div>
+        {/* Botón 2 */}
+        <Link
+          href="/grupo/familia"
+          className="
+            absolute 
+            left-[12%] 
+            right-[12%] 
+            top-[55%]        /* Ajustar para coincidir con la barra */
+            h-[60px]
+            flex items-center justify-center
+           text-black text-2xl font-semibold tracking-wide
 
-            <div className="mt-5 text-xs space-y-1">
-              <p style={{ color: dorado }}>
-                📝 La lista de regalos es solo para evitar repetidos. Cada
-                persona puede comprar donde prefiera.
-              </p>
-              <p className="text-[11px] text-slate-100">
-                🎁 Si un regalo aparece como “Ya seleccionado”, es porque
-                alguien más ya lo eligió.
-              </p>
-            </div>
-          </section>
-        </div>
+          "
+        >
+          Familia
+        </Link>
+
+        {/* Botón 3 */}
+        <Link
+          href="/grupo/colegas"
+          className="
+            absolute 
+            left-[12%] 
+            right-[12%] 
+            top-[66%]        /* Ajustar según necesites */
+            h-[60px]
+            flex items-center justify-center
+           text-black text-2xl font-semibold tracking-wide
+
+          "
+        >
+          Colegas
+        </Link>
+
       </div>
     </main>
   )
