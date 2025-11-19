@@ -87,7 +87,7 @@ export default function AmigasPage() {
             href="https://maps.app.goo.gl/L96kErubJ4JBC2h78"
             target="_blank"
             className="
-              absolute left-[12%] right-[12%] top-[69%] h-14
+              absolute left-[12%] right-[12%] top-[60%] h-14
               flex items-center justify-center
               text-black text-lg font-semibold
             "
