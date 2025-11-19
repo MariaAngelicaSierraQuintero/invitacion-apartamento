@@ -162,9 +162,9 @@ export default function FamiliaPage() {
                         </button>
                       ) : (
                         <p className="mt-2 text-xs text-slate-300">
-                          Ya seleccionado
-                          {item.selected_by ? ` por ${item.selected_by}` : ''}.
-                        </p>
+                          Ya seleccionado.
+                          </p>
+
                       )}
                     </div>
                   </li>
