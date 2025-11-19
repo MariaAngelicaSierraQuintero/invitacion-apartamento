@@ -108,11 +108,7 @@ export default function AmigasPage() {
             Lista de regalos
           </h2>
 
-          <p className="text-base text-slate-100 text-center mb-5 leading-relaxed font-medium">
-  La lista es solo para evitar regalos repetidos. <br />
-  Cada quien puede comprar donde prefiera.
-</p>
-
+  
 
           {loading ? (
             <p className="text-white text-center">Cargando...</p>
